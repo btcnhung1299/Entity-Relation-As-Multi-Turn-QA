@@ -1,5 +1,8 @@
 import json
 
+# ad hoc value for frequency of rel(head entity, tail entity)
+FREQ = 100 
+
 tag_idxs = {'B': 0, 'M': 1, 'E': 2, 'S': 3, 'O': 4}
 
 question_templates_path = "./data/query_templates/"
@@ -8,11 +11,11 @@ ace2005_question_templates = json.load(open(question_templates_path + 'ace2005.j
 zalo_question_templates = json.load(open(question_templates_path + "zalo_all.json"))
 
 
-zalo_entities = ["PER", "CLU", "TME"]
-zalo_entities_full = ["cầu thủ", "đội bóng", "mốc thời gian"]
+zalo_entities = ["PER", "CLU", "TME", "SCO"]
+zalo_entities_full = ["cầu thủ", "đội bóng", "mốc thời gian", "tỉ số"]
 
-zalo_relations = ["COMP", "DEFE", "SCOP", "SCOT", "CARP", "CART", "SUBP", "SUBT"]
-zalo_relations_full = ["đấu với", "bị đánh bại bởi", "ghi bàn cho", "là thời điểm ghi bàn của", "nhận thẻ phạt thuộc",
+zalo_relations = ["COMP", "DEFE", "DRAW", "SCOP", "SCOT", "CARP", "CART", "SUBP", "SUBT"]
+zalo_relations_full = ["đấu với", "bị đánh bại bởi", "hòa với", "ghi bàn cho", "là thời điểm ghi bàn của", "nhận thẻ phạt thuộc",
                         "là thời điểm nhận thẻ phạt của", "thay thế cho", "là thời điểm thay thế của"]
 
 
@@ -44,24 +47,22 @@ ace2005_idx1 = {'FAC': 0, 'GPE': 1, 'LOC': 2,
 ace2005_idx2t = {}
 for i, rel in enumerate(ace2005_relations):
     for j, ent in enumerate(ace2005_entities):
-        ace2005_idx2t[(rel, ent)] = i*len(ace2005_relations)+j+i
+        ace2005_idx2t[(rel, ent)] = i*len(ace2005_entities)+j
 ace2005_idx2 = ace2005_idx2t
 
 ace2004_idx2t = {}
 for i, rel in enumerate(ace2004_relations):
     for j, ent in enumerate(ace2004_entities):
-        ace2004_idx2t[(rel, ent)] = i*len(ace2004_relations)+j+i
+        ace2004_idx2t[(rel, ent)] = i*len(ace2004_entities)+j
 ace2004_idx2 = ace2004_idx2t
 
 zalo_idx2t = {}
 for i, rel in enumerate(zalo_relations):
     for j, ent in enumerate(zalo_entities):
-        zalo_idx2t[(rel, ent)] = i*len(zalo_relations)+j+i
+        zalo_idx2t[(rel, ent)] = i*len(zalo_entities)+j
 zalo_idx2 = zalo_idx2t
 
 # statistics on the training set
-
-zalo_dist = []
 
 ace2005_dist = [[0,   0,   0,   0,   0,   0,   0,   0,   3,   1,   0,   0,   0,
                  0,   0,   0,   0,   0,   0,   0,   0,  33, 116,  39,   2,   0,
@@ -120,3 +121,26 @@ ace2004_dist = [[0,    1,    0,    0,    0,    0,    0,    0,    2,    0,    0,
                  0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
                  0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
                  0,    0,    3,    1,    3,    0,    0,    2,    3]]
+
+
+# ad hoc value for zalo dist (fake statistics for zalo dataset :D)
+zalo_dist = [[0] * len(zalo_entities) * len(zalo_relations) 
+                for _ in range(len(zalo_entities))]
+
+zalo_pairs = [
+    ("CLU", "CLU"),
+    ("CLU", "CLU"),
+    ("CLU", "CLU"),
+    ("CLU", "PER"),
+    ("PER", "TME"),
+    ("CLU", "PER"),
+    ("PER", "TME"),
+    ("PER", "PER"),
+    ("PER", "TME")
+]
+
+for rel, pair in zip(zalo_relations, zalo_pairs):
+    head_entity, tail_entity = pair 
+    row_idx = zalo_idx1[head_entity]
+    col_idx = zalo_idx2[(rel, tail_entity)]
+    zalo_dist[row_idx][col_idx] = FREQ
