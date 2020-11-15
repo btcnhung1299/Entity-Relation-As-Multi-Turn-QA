@@ -3,7 +3,7 @@ import numpy as np
 from tqdm import tqdm
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, DistributedSampler
-from transformers import BertTokenizer
+from transformers import AutoTokenizer
 
 from preprocess import passage_blocks, get_question
 from constants import *
@@ -150,7 +150,12 @@ class MyDataset:
     def init_data(self):
         self.all_t1 = []
         self.all_t2 = []
-        if self.dataset_tag.lower() == "ace2004":
+        if self.dataset_tag.lower() == "zalo":
+            idx1s = zalo_idx1
+            idx2s = zalo_idx2
+            dist = zalo_dist
+            question_templates = zalo_question_templates
+        elif self.dataset_tag.lower() == "ace2004":
             idx1s = ace2004_idx1
             idx2s = ace2004_idx2
             dist = ace2004_dist
@@ -353,7 +358,7 @@ class T2Dataset:
 
 
 def load_data(dataset_tag, file_path, batch_size, max_len, pretrained_model_path, dist=False, shuffle=False, threshold=5):
-    tokenizer = BertTokenizer.from_pretrained(pretrained_model_path)
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_path)
     dataset = MyDataset(dataset_tag, file_path, tokenizer,
                         max_len, threshold)
     sampler = DistributedSampler(dataset) if dist else None
@@ -377,7 +382,7 @@ def reload_data(old_dataloader, batch_size, max_len, threshold, local_rank, shuf
 
 
 def load_t1_data(dataset_tag, test_path, pretrained_model_path, window_size, overlap, batch_size=10, max_len=512):
-    tokenizer = BertTokenizer.from_pretrained(pretrained_model_path)
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_path)
     t1_dataset = T1Dataset(dataset_tag, test_path,
                            tokenizer, window_size, overlap, max_len)
     dataloader = DataLoader(t1_dataset, batch_size, collate_fn=collate_fn1)

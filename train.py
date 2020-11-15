@@ -2,6 +2,7 @@ import os
 import time
 import random
 import argparse
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 import pickle
 from transformers.optimization import get_linear_schedule_with_warmup
@@ -27,7 +28,7 @@ def set_seed(seed):
 def args_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_tag", default='ace2005',
-                        choices=['ace2005', 'ace2004'])
+                        choices=['zalo', 'ace2005', 'ace2004'])
     parser.add_argument("--train_path")
     parser.add_argument("--train_batch", type=int, default=10)
     parser.add_argument("--test_path")

@@ -7,8 +7,8 @@ PRETRAINED_MODEL_PATH=vinai/phobert-base
 #training data
 python3 $REPO/preprocess_zalo.py \
 --data_dir $REPO/data/raw_data/zalo/train \
---dataset_tag ace2004 \
---window_size 512 \
+--dataset_tag zalo \
+--window_size 235 \
 --overlap 15 \
 --threshold 1 \
 --max_distance 45 \
@@ -18,7 +18,7 @@ python3 $REPO/preprocess_zalo.py \
 #test data
 python3 $REPO/preprocess_zalo.py \
 --data_dir $REPO/data/raw_data/zalo/dev \
---dataset_tag ace2004 \
+--dataset_tag zalo \
 --output_base_dir $REPO/data/cleaned_data/Zalo \
 --pretrained_model_path  $PRETRAINED_MODEL_PATH \
 --is_test
