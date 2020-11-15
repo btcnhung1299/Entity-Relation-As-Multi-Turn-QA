@@ -4,18 +4,21 @@ import json
 zalo_entity_tags = [
     "PER",   # player
     "CLU",   # club
-    "TME"   # time
+    "TME",   # time
+    "SCO" # scores
 ]
 
 zalo_entity_names = [
     "cầu thủ",
     "đội bóng",
-    "mốc thời gian"
+    "mốc thời gian", 
+    "tỉ số"
 ]
 
 zalo_relation_tags = [
     "COMP",  # (CLU, CLU) compete with
     "DEFE",  # (CLU, CLU) defeat / win over
+    "DRAW",  # (CLU, CLU) draw 
     "SCOP",  # (CLU, PER) score player
     "SCOT",  # (PER, TME) score time
     "CARP",  # (CLU, PER) card player,
@@ -27,6 +30,7 @@ zalo_relation_tags = [
 zalo_relations_names = [
     "đấu với",
     "bị đánh bại bởi",
+    "hòa với",
     "ghi bàn cho",
     "là thời điểm ghi bàn của",
     "nhận thẻ phạt thuộc",

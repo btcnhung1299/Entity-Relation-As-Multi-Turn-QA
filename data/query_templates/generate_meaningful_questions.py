@@ -4,10 +4,12 @@ import json
 zalo_entities = {
     "PER": "cầu thủ",
     "CLU": "đội bóng", 
-    "TME": "mốc thời gian"
+    "TME": "mốc thời gian",
+    "SCO": "tỉ số"
 }
 
 zalo_entity_pairs = [
+    ("CLU", "CLU"),
     ("CLU", "CLU"),
     ("CLU", "CLU"),
     ("CLU", "PER"),
@@ -21,6 +23,7 @@ zalo_entity_pairs = [
 zalo_relations = {
     "COMP": "đấu với",
     "DEFE": "bị đánh bại bởi",
+    "DRAW": "hòa với",
     "SCOP": "ghi bàn cho",
     "SCOT": "là thời điểm ghi bàn của",
     "CARP": "nhận thẻ phạt thuộc",
