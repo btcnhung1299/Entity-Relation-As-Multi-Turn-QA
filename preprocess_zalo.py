@@ -135,6 +135,7 @@ def get_block_er(txt, entities, relations, window_size, overlap, tokenizer):
         for j, (entity_type, start, end, entity_str) in enumerate(entities):
             if start >= s and end <= e:
                 nstart, nend = start-s, end-s
+                
                 if tokenizer.convert_tokens_to_string(blocks[i][nstart:nend]) == entity_str:
                     es.append((entity_type, nstart, nend, entity_str))
                     e_dict[j] = e_dict.get(j, [])+[i]
@@ -212,12 +213,14 @@ def block2qas(ber, dataset_tag, title="", threshold=1, max_distance=45):
         raise Exception("this data set is not yet supported")
     block, ents, relas = ber
     res = {'context': block, 'title': title}
+
     # QA turn 1
     dict1 = {k: get_question(question_templates, k) for k in entities}
     qat1 = {dict1[k]: [] for k in dict1}
     for en in ents:
         q = dict1[en[0]]
         qat1[q].append(en)
+
     # QA turn 2
     if max_distance > 0:
         dict2 = {(rel[1], rel[0], rel[2][0]): [] for rel in relas}
@@ -275,7 +278,7 @@ def char_to_wordpiece(passage, entities, tokenizer):
         ent_str2 = tokenizer.convert_tokens_to_string(ent_str1)
 
         assert tpassage[start1:end1] == ent_str1, f"Passage: {tpassage[start1 - 10 : end1 + 10]}\nEntity: {ent_str} {ent_str1} {ent_str2}, {tpassage[start1:end1]} != {ent_str1}"
-        entities1.append((ent_type, start, end, ent_str2))
+        entities1.append((ent_type, start1, end1, ent_str2))
     return entities1
 
 
