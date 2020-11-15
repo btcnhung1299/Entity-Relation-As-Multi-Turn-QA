@@ -1,12 +1,20 @@
 import json
 
-question_templates_path = "./data/query_templates/"
-ace2004_question_templates = json.load(
-    open(question_templates_path+'ace2004.json'))
-ace2005_question_templates = json.load(
-    open(question_templates_path+'ace2005.json'))
-
 tag_idxs = {'B': 0, 'M': 1, 'E': 2, 'S': 3, 'O': 4}
+
+question_templates_path = "./data/query_templates/"
+ace2004_question_templates = json.load(open(question_templates_path + 'ace2004.json'))
+ace2005_question_templates = json.load(open(question_templates_path + 'ace2005.json'))
+zalo_question_templates = json.load(open(question_templates_path + "zalo_all.json"))
+
+
+zalo_entities = ["PER", "CLU", "TME"]
+zalo_entities_full = ["cầu thủ", "đội bóng", "mốc thời gian"]
+
+zalo_relations = ["COMP", "DEFE", "SCOP", "SCOT", "CARP", "CART", "SUBP", "SUBT"]
+zalo_relations_full = ["đấu với", "bị đánh bại bởi", "ghi bàn cho", "là thời điểm ghi bàn của", "nhận thẻ phạt thuộc",
+                        "là thời điểm nhận thẻ phạt của", "thay thế cho", "là thời điểm thay thế của"]
+
 
 ace2004_entities = ['FAC', 'GPE', 'LOC', 'ORG', 'PER', 'VEH', 'WEA']
 ace2004_entities_full = ["facility", "geo political",
@@ -24,22 +32,37 @@ ace2005_relations = ['ART', 'GEN-AFF',
 ace2005_relations_full = ["artifact", "gen affilliation",
                           'organization affiliation', 'part whole', 'person social', 'physical']
 
+
 # index of ace2004 and ace2005 frequency matrix
+zalo_idx1 = {"PER": 0, "CLU": 1, "TME": 2, "SCO": 3}
 ace2004_idx1 = {'FAC': 0, 'GPE': 1, 'LOC': 2,
                 'ORG': 3, 'PER': 4, 'VEH': 5, 'WEA': 6}
 ace2005_idx1 = {'FAC': 0, 'GPE': 1, 'LOC': 2,
                 'ORG': 3, 'PER': 4, 'VEH': 5, 'WEA': 6}
+
+
 ace2005_idx2t = {}
 for i, rel in enumerate(ace2005_relations):
     for j, ent in enumerate(ace2005_entities):
         ace2005_idx2t[(rel, ent)] = i*len(ace2005_relations)+j+i
 ace2005_idx2 = ace2005_idx2t
+
 ace2004_idx2t = {}
 for i, rel in enumerate(ace2004_relations):
     for j, ent in enumerate(ace2004_entities):
         ace2004_idx2t[(rel, ent)] = i*len(ace2004_relations)+j+i
 ace2004_idx2 = ace2004_idx2t
+
+zalo_idx2t = {}
+for i, rel in enumerate(zalo_relations):
+    for j, ent in enumerate(zalo_entities):
+        zalo_idx2t[(rel, ent)] = i*len(zalo_relations)+j+i
+zalo_idx2 = zalo_idx2t
+
 # statistics on the training set
+
+zalo_dist = []
+
 ace2005_dist = [[0,   0,   0,   0,   0,   0,   0,   0,   3,   1,   0,   0,   0,
                  0,   0,   0,   0,   0,   0,   0,   0,  33, 116,  39,   2,   0,
                  0,   0,   0,   0,   0,   0,   0,   0,   0,  10,  22,  11,   0,
