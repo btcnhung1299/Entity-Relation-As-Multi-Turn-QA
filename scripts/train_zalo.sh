@@ -1,3 +1,4 @@
+export CUDA_VISIBLE_DEVICES=1
 HOME=~/joanna
 REPO=$HOME/zalo/multi_qa/Entity-Relation-As-Multi-Turn-QA
 PRETRAINED_MODEL=vinai/phobert-base
@@ -5,9 +6,9 @@ PRETRAINED_MODEL=vinai/phobert-base
 
 python $REPO/train.py \
 --dataset_tag zalo \
---train_path $REPO/data/cleaned_data/Zalo/phobert-base_overlap_15_window_235_threshold_1_max_distance_45/train.json \
+--train_path $REPO/data/cleaned_data/zalo/train.json \
 --train_batch 20 \
---test_path $REPO/data/cleaned_data/Zalo/dev.json \
+--test_path $REPO/data/cleaned_data/zalo/dev.json \
 --test_batch 20 \
 --pretrained_model_path $PRETRAINED_MODEL \
 --max_epochs 10 \

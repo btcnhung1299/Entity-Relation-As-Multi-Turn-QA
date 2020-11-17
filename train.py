@@ -2,7 +2,6 @@ import os
 import time
 import random
 import argparse
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 import pickle
 from transformers.optimization import get_linear_schedule_with_warmup
@@ -142,7 +141,7 @@ def train(args, train_dataloader):
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
                 pickle.dump(args, open(save_dir+'args', 'wb'))
-            save_path = save_dir+"checkpoint_%d.cpt" % epoch
+            save_path = save_dir+"checkpoint_%d.ckpt" % epoch
             torch.save(checkpoint, save_path)
             print("model saved at:", save_path)
         if args.test_eval and args.local_rank in [-1, 0]:

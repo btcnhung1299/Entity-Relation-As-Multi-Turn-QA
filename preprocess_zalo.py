@@ -5,6 +5,7 @@ import argparse
 
 from tqdm import tqdm
 from constants import *
+from transformers import AutoTokenizer 
 
 
 def aligment_ann(original, newtext, ann_file, offset):
@@ -352,12 +353,7 @@ if __name__ == "__main__":
     parser.add_argument("--max_distance", type=int, default=45,
                         help="used to filter relations by distance from the head entity")
     args = parser.parse_args()
-    if not args.is_test:
-        output_dir = "{}/{}_overlap_{}_window_{}_threshold_{}_max_distance_{}".format(args.output_base_dir, os.path.split(
-            args.pretrained_model_path)[-1], args.overlap, args.window_size, args.threshold, args.max_distance)
-    else:
-        output_dir = args.output_base_dir
-    from transformers import AutoTokenizer 
+    output_dir = args.output_base_dir
     tokenizer = AutoTokenizer.from_pretrained(args.pretrained_model_path)
     process(args.data_dir, output_dir, tokenizer, args.is_test,
             args.window_size, args.overlap, args.dataset_tag, args.threshold, args.max_distance)

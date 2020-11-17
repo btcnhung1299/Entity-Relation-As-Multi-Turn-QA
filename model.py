@@ -1,13 +1,13 @@
 import torch
 import torch.nn as nn
-from transformers import BertModel
+from transformers import AutoModel
 
 
 class MyModel(nn.Module):
     def __init__(self, config):
         super(MyModel, self).__init__()
         self.config = config
-        self.bert = BertModel.from_pretrained(config.pretrained_model_path)
+        self.bert = AutoModel.from_pretrained(config.pretrained_model_path)
         self.tag_linear = nn.Linear(self.bert.config.hidden_size, 5)
         self.dropout = nn.Dropout(config.dropout_prob)
         self.loss_func = nn.CrossEntropyLoss()
@@ -23,7 +23,8 @@ class MyModel(nn.Module):
             target_tags: (batch,seq_len)
             turn_mask: (batch,) turn_mask[i]=0 for turn 1，turn_mask[i]=1 for turn 2
         """
-        rep, _ = self.bert(input, attention_mask, token_type_ids)
+        rep, _ = self.bert(input, attention_mask)
+        # rep, _ = self.bert(input, attention_mask, token_type_ids)
         rep = self.dropout(rep)
         tag_logits = self.tag_linear(rep)  # (batch,seq_len,num_tag)
         if not target_tags is None:

@@ -15,6 +15,7 @@ def collate_fn(batch):
     for b in batch:
         for k, v in b.items():
             nbatch[k] = nbatch.get(k, []) + [torch.tensor(v)]
+
     txt_ids = nbatch['txt_ids']
     tags = nbatch['tags']
     context_mask = nbatch['context_mask']
@@ -94,7 +95,7 @@ def get_inputs(context, q, tokenizer, title="", max_len=200, ans=[], head_entity
         tags = tags[:max_len -
                     len(query) - 3] if not title else tags[:max_len-len(query)-len(title)-4]
     if title:
-        txt = ['[CLS]'] + query+['[SEP]'] + \
+        txt = ['[CLS]'] + query + ['[SEP]'] + \
             title + ['[SEP]'] + context + ['[SEP]']
     else:
         txt = ['[CLS]'] + query + ['[SEP]'] + context + ['[SEP]']
@@ -216,7 +217,10 @@ class T1Dataset:
         with open(test_path, encoding="utf=8") as f:
             data = json.load(f)
         self.dataset_tag = dataset_tag
-        if dataset_tag.lower() == 'ace2004':
+        if dataset_tag.lower() == 'zalo':
+            dataset_entities = zalo_entities
+            question_templates = zalo_question_templates
+        elif dataset_tag.lower() == 'ace2004':
             dataset_entities = ace2004_entities
             question_templates = ace2004_question_templates
         elif dataset_tag.lower() == 'ace2005':
@@ -281,7 +285,14 @@ class T2Dataset:
             t1_predict: predictions of the first turn QA
             threshold: only consider relationships where the frequency is greater than or equal to the threshold
         '''
-        if t1_dataset.dataset_tag.lower() == "ace2004":
+        if t1_dataset.dataset_tag.lower() == "zalo":
+            idx1s = zalo_idx1
+            idx2s = zalo_idx2
+            dist = zalo_dist
+            dataset_entities = zalo_entities
+            dataset_relations = zalo_relations
+            question_templates = zalo_question_templates
+        elif t1_dataset.dataset_tag.lower() == "ace2004":
             idx1s = ace2004_idx1
             idx2s = ace2004_idx2
             dist = ace2004_dist
