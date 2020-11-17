@@ -15,7 +15,7 @@ python $REPO/train.py \
 --warmup_ratio 0.1 \
 --lr 2e-5 \
 --theta 0.25 \
---window_size 300 \
+--window_size 200 \
 --overlap 45 \
 --threshold 3 \
 --max_grad_norm 1 \

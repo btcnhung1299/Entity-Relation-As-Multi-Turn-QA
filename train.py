@@ -144,6 +144,7 @@ def train(args, train_dataloader):
             save_path = save_dir+"checkpoint_%d.ckpt" % epoch
             torch.save(checkpoint, save_path)
             print("model saved at:", save_path)
+
         if args.test_eval and args.local_rank in [-1, 0]:
             test_dataloader = load_t1_data(args.dataset_tag, args.test_path, args.pretrained_model_path,
                                            args.window_size, args.overlap, args.test_batch, args.max_len)  # test_dataloader是第一轮问答的dataloder

@@ -26,8 +26,7 @@ def test_evaluation(model, t1_dataloader, threshold, amp=False):
         for i, batch in enumerate(tqdm(t1_dataloader, desc="t1 predict")):
             txt_ids, attention_mask, token_type_ids, context_mask = batch['txt_ids'], batch[
                 'attention_mask'], batch['token_type_ids'], batch['context_mask']
-            tag_idxs = model(txt_ids.to(device), attention_mask.to(
-                device), token_type_ids.to(device))
+            tag_idxs = model(txt_ids.to(device), attention_mask.to(device), token_type_ids.to(device))
             predict_spans = tag_decode(tag_idxs, context_mask)
             t1_predict.extend(predict_spans)
     # turn 2
@@ -37,10 +36,10 @@ def test_evaluation(model, t1_dataloader, threshold, amp=False):
         for i, batch in enumerate(tqdm(t2_dataloader, desc="t2 predict")):
             txt_ids, attention_mask, token_type_ids, context_mask = batch['txt_ids'], batch[
                 'attention_mask'], batch['token_type_ids'], batch['context_mask']
-            tag_idxs = model(txt_ids.to(device), attention_mask.to(
-                device), token_type_ids.to(device))
+            tag_idxs = model(txt_ids.to(device), attention_mask.to(device), token_type_ids.to(device))
             predict_spans = tag_decode(tag_idxs, context_mask)
             t2_predict.extend(predict_spans)
+
     # get basic information
     t1_ids = t1_dataloader.dataset.t1_ids
     t2_ids = t2_dataloader.dataset.t2_ids
@@ -108,7 +107,7 @@ def eval_t2(predict, gold, ids, query_offset, window_offset_base):
 
 
 def tag_decode(tags, context_mask=None):
-    spans = [[]]*tags.shape[0]
+    spans = [[]] * tags.shape[0]
     tags = tags.tolist()
     if not context_mask is None:
         context_mask = context_mask.tolist()
@@ -131,19 +130,19 @@ def tag_decode(tags, context_mask=None):
         j = s
         while j < e:
             if tags[i][j] == tag_idxs['S']:
-                span.append([j, j+1])
+                span.append([j, j + 1])
                 j += 1
             elif tags[i][j] == tag_idxs['B'] and j < e-1:
-                for k in range(j+1, e):
+                for k in range(j + 1, e):
                     if tags[i][k] in [tag_idxs['B'], tag_idxs['S']]:
                         j = k
                         break
                     elif tags[i][k] == tag_idxs["E"]:
-                        span.append([j, k+1])
-                        j = k+1
+                        span.append([j, k + 1])
+                        j = k + 1
                         break
-                    elif k == e-1:
-                        j = k+1
+                    elif k == e - 1:
+                        j = k + 1
             else:
                 j += 1
         spans[i] = span

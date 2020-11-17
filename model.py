@@ -24,7 +24,6 @@ class MyModel(nn.Module):
             turn_mask: (batch,) turn_mask[i]=0 for turn 1，turn_mask[i]=1 for turn 2
         """
         rep, _ = self.bert(input, attention_mask)
-        # rep, _ = self.bert(input, attention_mask, token_type_ids)
         rep = self.dropout(rep)
         tag_logits = self.tag_linear(rep)  # (batch,seq_len,num_tag)
         if not target_tags is None:
