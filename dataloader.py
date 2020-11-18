@@ -391,7 +391,7 @@ def load_data(dataset_tag, file_path, batch_size, max_len, pretrained_model_path
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_path)
     dataset = MyDataset(dataset_tag, file_path, tokenizer, max_len, threshold)
     sampler = DistributedSampler(dataset) if dist else None
-    dataloader = DataLoader(dataset, batch_size, sampler=sampler, shuffle=shuffle if not sampler else False, collate_fn=collate_fn)
+    dataloader = DataLoader(dataset, batch_size, sampler=sampler, shuffle=shuffle if not sampler else False, collate_fn=collate_fn, drop_last=True)
     return dataloader
 
 
@@ -405,18 +405,18 @@ def reload_data(old_dataloader, batch_size, max_len, threshold, local_rank, shuf
     sampler = DistributedSampler(
         dataset, rank=local_rank) if local_rank != -1 else None
     dataloader = DataLoader(
-        dataset, batch_size, sampler=sampler, shuffle=shuffle, collate_fn=collate_fn)
+        dataset, batch_size, sampler=sampler, shuffle=shuffle, collate_fn=collate_fn, drop_last=True)
     return dataloader
 
 
 def load_t1_data(dataset_tag, test_path, pretrained_model_path, window_size, overlap, batch_size=10, max_len=512):
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_path)
     t1_dataset = T1Dataset(dataset_tag, test_path, tokenizer, window_size, overlap, max_len)
-    dataloader = DataLoader(t1_dataset, batch_size, collate_fn=collate_fn1)
+    dataloader = DataLoader(t1_dataset, batch_size, collate_fn=collate_fn1, drop_last=True)
     return dataloader
 
 
 def load_t2_data(t1_dataset, t1_predict, batch_size=10, threshold=5):
     t2_dataset = T2Dataset(t1_dataset, t1_predict, threshold)
-    dataloader = DataLoader(t2_dataset, batch_size, collate_fn=collate_fn1)
+    dataloader = DataLoader(t2_dataset, batch_size, collate_fn=collate_fn1, drop_last=True)
     return dataloader
