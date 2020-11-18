@@ -21,14 +21,20 @@ def test_evaluation(model, t1_dataloader, threshold, amp=False):
     t2_predict = []
     device = torch.device(
         "cuda") if torch.cuda.is_available() else torch.device("cpu")
+
     # turn 1
     with (torch.no_grad() if not amp else torch.cuda.amp.autocast()):
         for i, batch in enumerate(tqdm(t1_dataloader, desc="t1 predict")):
             txt_ids, attention_mask, token_type_ids, context_mask = batch['txt_ids'], batch[
                 'attention_mask'], batch['token_type_ids'], batch['context_mask']
-            tag_idxs = model(txt_ids.to(device), attention_mask.to(device), token_type_ids.to(device))
+            tag_idxs = model(
+                    txt_ids.to(device), 
+                    attention_mask.to(device), 
+                    token_type_ids.to(device)
+                    )
             predict_spans = tag_decode(tag_idxs, context_mask)
             t1_predict.extend(predict_spans)
+
     # turn 2
     t2_dataloader = load_t2_data(
         t1_dataloader.dataset, t1_predict, 10, threshold)
@@ -67,12 +73,13 @@ def eval_t1(predict, gold, ids, query_offset, window_offset_base):
     predict1 = []
     for i, (_id, pre) in enumerate(zip(ids, predict)):
         passage_id, window_id, entity_type = _id
-        window_offset = window_offset_base*window_id
+        window_offset = window_offset_base * window_id
         for start, end in pre:
-            start1, end1 = start - query_offset[i]+window_offset, \
-                            end - query_offset[i]+window_offset
+            start1, end1 = start - query_offset[i] + window_offset, \
+                            end - query_offset[i] + window_offset
             new = (passage_id, (entity_type, start1, end1))
             predict1.append(new)
+    print("predicted 1", predict1)
     return get_score(set(gold), set(predict1))
 
 
@@ -88,7 +95,7 @@ def eval_t2(predict, gold, ids, query_offset, window_offset_base):
     predict1 = []
     for i, (_id, pre) in enumerate(zip(ids, predict)):
         passage_id, window_id, head_entity, relation_type, end_entity_type = _id
-        window_offset = window_offset_base*window_id
+        window_offset = window_offset_base * window_id
         head_start = head_entity[1]
         for start, end in pre:
             #since we added two special tokens around the head entity for identification, there is a correction of 1.
