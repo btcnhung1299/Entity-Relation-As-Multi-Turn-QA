@@ -50,12 +50,9 @@ def collate_fn1(batch):
     txt_ids = nbatch['txt_ids']
     context_mask = nbatch['context_mask']
     token_type_ids = nbatch['token_type_ids']
-    ntxt_ids = pad_sequence(txt_ids, batch_first=True,
-                            padding_value=0)
-    ncontext_mask = pad_sequence(
-        context_mask, batch_first=True, padding_value=0)
-    ntoken_type_ids = pad_sequence(
-        token_type_ids, batch_first=True, padding_value=1)
+    ntxt_ids = pad_sequence(txt_ids, batch_first=True, padding_value=0)
+    ncontext_mask = pad_sequence(context_mask, batch_first=True, padding_value=0)
+    ntoken_type_ids = pad_sequence(token_type_ids, batch_first=True, padding_value=1)
     attention_mask = torch.zeros(ntxt_ids.shape)
     for i in range(len(ntxt_ids)):
         txt_len = len(txt_ids[i])
@@ -80,6 +77,7 @@ def get_inputs(context, q, tokenizer, title="", max_len=200, ans=[], head_entity
                 tags[i] = tag_idxs['M']
         else:
             tags[start] = tag_idxs['S']
+
     if head_entity:
         h_start, h_end = head_entity[1], head_entity[2]
         context = context[: h_start] + ['[unused0]'] + \
@@ -87,31 +85,38 @@ def get_inputs(context, q, tokenizer, title="", max_len=200, ans=[], head_entity
         assert len(context) == len(tags) + 2, f"Expected context length ({len(context)}) == Tags length ({len(tags)}) + 2, context\n {context}"
         tags = tags[: h_start] + [tag_idxs['O']] + \
             tags[h_start : h_end] + [tag_idxs['O']] + tags[h_end :]
-    txt_len = len(query) + len(title) + len(context) +  4 if title else len(query) + len(context) + 3
-    if txt_len > max_len:
-        context = context[: max_len -
-                          len(query) - 3] if not title else context[:max_len-len(query)-len(title)-4]
-        tags = tags[:max_len -
-                    len(query) - 3] if not title else tags[:max_len-len(query)-len(title)-4]
 
+    txt_len = len(query) + len(title) + len(context) + 4 if title else len(query) + len(context) + 4
+    if txt_len > max_len:
+        context = context[: max_len - len(query) - 4] \
+                          if not title else context[:max_len-len(query)-len(title)-4]
+        tags = tags[: max_len - len(query) - 4] \
+                    if not title else tags[:max_len-len(query)-len(title)-4]
     if title:
-        txt = ['[CLS]'] + query + ['[SEP]'] + \
-            title + ['[SEP]'] + context + ['[SEP]']
+        txt = ['<s>'] + query + ['</s>'] + title + ['</s>'] + context + ['</s>']
     else:
-        txt = ['[CLS]'] + query + ['[SEP]'] + context + ['[SEP]']
+        txt = ['<s>'] + query + ['</s>'] + ['</s>'] + context + ['</s']
     txt_ids = tokenizer.convert_tokens_to_ids(txt)
     # [CLS] is used to judge whether there is an answer
     if not title:
-        tags1 = [tag_idxs['O'] if len(
-            ans) > 0 else tag_idxs['S']] + [-1] * (len(query) + 1) + tags + [-1]
-        context_mask = [1] + [0] * (len(query) + 1) + [1] * len(context) + [0]
-        token_type_ids = [0] * (len(query) + 2) + [1] * (len(context) + 1)
+        tags1 = [tag_idxs['O'] if len(ans) > 0 \
+            else tag_idxs['S']] + [-1] * (len(query) + 2) + tags + [-1]
+        context_mask = [1] + [0] * (len(query) + 2) + [1] * len(context) + [0]
+        token_type_ids = [0] * (len(query) + 3) + [1] * (len(context) + 1)
     else:
-        tags1 = [tag_idxs['O'] if len(
-            ans) > 0 else tag_idxs['S']] + [-1] * (len(query) + len(title) + 2) + tags + [-1]
-        context_mask = [1] + [0] * \
-            (len(query) + len(title) + 2) + [1] * len(context) + [0]
+        tags1 = [tag_idxs['O'] if len(ans) > 0
+            else tag_idxs['S']] + [-1] * (len(query) + len(title) + 2) + tags + [-1]
+        context_mask = [1] + [0] * (len(query) + len(title) + 2) + [1] * len(context) + [0]
         token_type_ids = [0] * (len(query) + len(title) + 3) + [1] * (len(context) + 1)
+
+    assert len(txt_ids) == len(tags1) == len(context_mask) == len(token_type_ids), f"txt_ids {txt_ids}, tags1 {tags1}, context_mask {context_mask}, token_type_ids {token_type_ids}"
+    """
+    if len(ans) > 0:
+        for txt_id, tag1, mask, token_type_id in zip(txt_ids, tags1, context_mask, token_type_ids):
+            print(tokenizer.convert_ids_to_tokens(txt_id), tag1, mask, token_type_id, sep="\t\t", end="\n")
+        print("-------------------------------")
+        exit()
+    """
     return txt_ids, tags1, context_mask, token_type_ids
 
 
@@ -280,7 +285,7 @@ class T1Dataset:
                                         "token_type_ids": token_type_ids})
                     self.t1_ids.append((p_id, b_id, dataset_entities[q_id]))
                     if not title:
-                        ofs = len(tokenizer.tokenize(q)) + 2
+                        ofs = len(tokenizer.tokenize(q)) + 3
                     else:
                         ofs = len(title) + len(tokenizer.tokenize(q)) + 3
                     self.query_offset1.append(ofs)
@@ -375,7 +380,7 @@ class T2Dataset:
                             self.t2_ids.append(
                                 (passage_id, window_id, head_entity[:-1], rel, end_ent_type))
                             if not title:
-                                ofs = len(tokenizer.tokenize(query)) + 2
+                                ofs = len(tokenizer.tokenize(query)) + 3
                             else:
                                 ofs = len(title) + len(tokenizer.tokenize(query)) + 3 
                             self.query_offset2.append(ofs)
@@ -391,7 +396,7 @@ def load_data(dataset_tag, file_path, batch_size, max_len, pretrained_model_path
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_path)
     dataset = MyDataset(dataset_tag, file_path, tokenizer, max_len, threshold)
     sampler = DistributedSampler(dataset) if dist else None
-    dataloader = DataLoader(dataset, batch_size, sampler=sampler, shuffle=shuffle if not sampler else False, collate_fn=collate_fn)
+    dataloader = DataLoader(dataset, batch_size, sampler=sampler, shuffle=shuffle if not sampler else False, collate_fn=collate_fn, drop_last=True)
     return dataloader
 
 
@@ -405,18 +410,18 @@ def reload_data(old_dataloader, batch_size, max_len, threshold, local_rank, shuf
     sampler = DistributedSampler(
         dataset, rank=local_rank) if local_rank != -1 else None
     dataloader = DataLoader(
-        dataset, batch_size, sampler=sampler, shuffle=shuffle, collate_fn=collate_fn)
+        dataset, batch_size, sampler=sampler, shuffle=shuffle, collate_fn=collate_fn, drop_last=True)
     return dataloader
 
 
 def load_t1_data(dataset_tag, test_path, pretrained_model_path, window_size, overlap, batch_size=10, max_len=512):
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_path)
     t1_dataset = T1Dataset(dataset_tag, test_path, tokenizer, window_size, overlap, max_len)
-    dataloader = DataLoader(t1_dataset, batch_size, collate_fn=collate_fn1)
+    dataloader = DataLoader(t1_dataset, batch_size, collate_fn=collate_fn1, drop_last=True)
     return dataloader
 
 
 def load_t2_data(t1_dataset, t1_predict, batch_size=10, threshold=5):
     t2_dataset = T2Dataset(t1_dataset, t1_predict, threshold)
-    dataloader = DataLoader(t2_dataset, batch_size, collate_fn=collate_fn1)
+    dataloader = DataLoader(t2_dataset, batch_size, collate_fn=collate_fn1, drop_last=True)
     return dataloader

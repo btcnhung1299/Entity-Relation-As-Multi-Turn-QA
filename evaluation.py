@@ -2,7 +2,8 @@ import torch
 from tqdm import tqdm
 
 from dataloader import tag_idxs, load_t2_data
-
+from transformers import AutoTokenizer
+tokenizer = AutoTokenizer.from_pretrained("vinai/phobert-base")
 
 def get_score(gold_set, predict_set):
     TP = len(set.intersection(gold_set, predict_set))
@@ -79,7 +80,6 @@ def eval_t1(predict, gold, ids, query_offset, window_offset_base):
                             end - query_offset[i] + window_offset
             new = (passage_id, (entity_type, start1, end1))
             predict1.append(new)
-    print("predicted 1", predict1)
     return get_score(set(gold), set(predict1))
 
 
@@ -115,6 +115,8 @@ def eval_t2(predict, gold, ids, query_offset, window_offset_base):
 
 def tag_decode(tags, context_mask=None):
     spans = [[]] * tags.shape[0]
+    if tags.shape[1] > 272:
+        print("> 272")
     tags = tags.tolist()
     if not context_mask is None:
         context_mask = context_mask.tolist()
