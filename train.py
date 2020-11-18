@@ -94,8 +94,9 @@ def train(args, train_dataloader):
     for epoch in range(args.max_epochs):
         if args.local_rank != -1:
             train_dataloader.sampler.set_epoch(epoch)
+        tqdm_dict = {"loss": "0.00", "loss_t1": "0.00", "loss_t2": "0.00"}
         tqdm_train_dataloader = tqdm(
-            train_dataloader, desc="epoch:%d" % epoch, ncols=150)
+            train_dataloader, desc="epoch:%d" % epoch, ncols=100, postfix=tqdm_dict)
         for i, batch in enumerate(tqdm_train_dataloader):
             torch.cuda.empty_cache()
             optimizer.zero_grad()
@@ -128,9 +129,12 @@ def train(args, train_dataloader):
                 [torch.norm(p.grad) for n, p in named_parameters])).item()
             if args.warmup_ratio > 0:
                 scheduler.step()
-            postfix_str = "norm:{:.2f},lr:{:.1e},loss:{:.2e},t1:{:.2e},t2:{:.2e}".format(
-                grad_norm, lr, loss.item(), loss_t1, loss_t2)
-            tqdm_train_dataloader.set_postfix_str(postfix_str)
+
+            tqdm_dict["loss"] = "{:.2f}".format(loss.item())
+            tqdm_dict["loss_t1"] = "{:.2f}".format(loss_t1)
+            tqdm_dict["loss_t2"] = "{:.2f}".format(loss_t2)
+            tqdm_train_dataloader.set_postfix(tqdm_dict)
+
         if args.local_rank in [-1, 0] and not args.not_save:
             if hasattr(model, 'module'):
                 model_state_dict = model.module.state_dict()
