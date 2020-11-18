@@ -65,7 +65,7 @@ def args_parser():
 
 def train(args, train_dataloader):
     model = MyModel(args)
-    model.train()
+    # model.train()
     if args.amp:
         scaler = GradScaler()
     device = args.local_rank if args.local_rank != -1 \
@@ -94,8 +94,9 @@ def train(args, train_dataloader):
     for epoch in range(args.max_epochs):
         if args.local_rank != -1:
             train_dataloader.sampler.set_epoch(epoch)
+        tqdm_dict = {"loss": "0.00", "loss_t1": "0.00", "loss_t2": "0.00"}    
         tqdm_train_dataloader = tqdm(
-            train_dataloader, desc="epoch:%d" % epoch, ncols=150)
+            train_dataloader, desc="epoch:%d" % epoch, ncols=100, postfix=tqdm_dict)
         for i, batch in enumerate(tqdm_train_dataloader):
             torch.cuda.empty_cache()
             optimizer.zero_grad()
@@ -128,9 +129,12 @@ def train(args, train_dataloader):
                 [torch.norm(p.grad) for n, p in named_parameters])).item()
             if args.warmup_ratio > 0:
                 scheduler.step()
-            postfix_str = "norm:{:.2f},lr:{:.1e},loss:{:.2e},t1:{:.2e},t2:{:.2e}".format(
-                grad_norm, lr, loss.item(), loss_t1, loss_t2)
-            tqdm_train_dataloader.set_postfix_str(postfix_str)
+
+            tqdm_dict["loss"] = "{:.2f}".format(loss.item())
+            tqdm_dict["loss_t1"] = "{:.2f}".format(loss_t1)
+            tqdm_dict["loss_t2"] = "{:.2f}".format(loss_t2)
+            tqdm_train_dataloader.set_postfix(tqdm_dict, refresh=False)
+
         if args.local_rank in [-1, 0] and not args.not_save:
             if hasattr(model, 'module'):
                 model_state_dict = model.module.state_dict()
@@ -141,13 +145,15 @@ def train(args, train_dataloader):
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
                 pickle.dump(args, open(save_dir+'args', 'wb'))
-            save_path = save_dir+"checkpoint_%d.ckpt" % epoch
+            save_path = save_dir + "checkpoint_%d.ckpt" % epoch
             torch.save(checkpoint, save_path)
             print("model saved at:", save_path)
 
+        print("Start testing..........................")
         if args.test_eval and args.local_rank in [-1, 0]:
-            test_dataloader = load_t1_data(args.dataset_tag, args.test_path, args.pretrained_model_path,
-                                           args.window_size, args.overlap, args.test_batch, args.max_len)  # test_dataloader是第一轮问答的dataloder
+            test_dataloader = load_t1_data(args.dataset_tag, 
+                    args.test_path, args.pretrained_model_path,
+                    args.window_size, args.overlap, args.test_batch, args.max_len)  # test_dataloader是第一轮问答的dataloder
             (p1, r1, f1), (p2, r2, f2) = test_evaluation(
                 model, test_dataloader, args.threshold, args.amp)
             print(
@@ -163,14 +169,16 @@ if __name__ == "__main__":
     args = args_parser()
     set_seed(args.seed)
     print(args)
+
     if args.local_rank != -1:
         torch.distributed.init_process_group(backend='nccl')
     p = '{}_{}_{}'.format(args.dataset_tag, os.path.split(
         args.train_path)[-1].split('.')[0], os.path.split(args.pretrained_model_path)[-1])
     p1 = os.path.join(os.path.split(args.train_path)[0], p)
+
+    # Load data for training
     if not os.path.exists(p1) or args.reload:
-        train_dataloader = load_data(args.dataset_tag, args.train_path, args.train_batch, args.max_len, args.pretrained_model_path,
-                                     args.local_rank != -1, shuffle=True, threshold=args.threshold)
+        train_dataloader = load_data(args.dataset_tag, args.train_path, args.train_batch, args.max_len, args.pretrained_model_path, args.local_rank != -1, shuffle=True, threshold=args.threshold)
         pickle.dump(train_dataloader, open(p1, 'wb'))
         print("training data saved at ", p1)
     else:
@@ -179,4 +187,5 @@ if __name__ == "__main__":
         train_dataloader = reload_data(train_dataloader, args.train_batch, args.max_len,
                                        args.threshold, args.local_rank, True)
         pickle.dump(train_dataloader, open(p1, 'wb'))
+
     train(args, train_dataloader)
