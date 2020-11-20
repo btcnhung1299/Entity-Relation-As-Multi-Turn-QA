@@ -3,3 +3,6 @@ data/raw_data/zalo/*
 data/cleaned_data/
 .vscode
 VnCoreNLP/
+__pycache__/
+predictions.zip
+predictions/

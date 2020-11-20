@@ -12,10 +12,10 @@ zalo_question_templates = json.load(open(question_templates_path + "zalo_all.jso
 
 
 zalo_entities = ["PER", "CLU", "TME", "SCO"]
-zalo_entities_full = ["cầu thủ", "đội bóng", "mốc thời gian", "tỉ số"]
+zalo_entities_full = ["cầu thủ", "đội bóng", "mốc thời gian", "điểm số"]
 
-zalo_relations = ["COMP", "DEFE", "DRAW", "SCOP", "SCOT", "CARP", "CART", "SUBP", "SUBT"]
-zalo_relations_full = ["đấu với", "bị đánh bại bởi", "hòa với", "ghi bàn cho", "là thời điểm ghi bàn của", "nhận thẻ phạt thuộc",
+zalo_relations = ["COMP", "SCOC", "SCOP", "SCOT", "CARP", "CART", "SUBP", "SUBT"]
+zalo_relations_full = ["đấu với", "đạt được của", "ghi bàn cho", "là thời điểm ghi bàn của", "nhận thẻ phạt thuộc",
                         "là thời điểm nhận thẻ phạt của", "thay thế cho", "là thời điểm thay thế của"]
 
 
@@ -129,8 +129,7 @@ zalo_dist = [[0] * len(zalo_entities) * len(zalo_relations)
 
 zalo_pairs = [
     ("CLU", "CLU"),
-    ("CLU", "CLU"),
-    ("CLU", "CLU"),
+    ("CLU", "SCO"),
     ("CLU", "PER"),
     ("PER", "TME"),
     ("CLU", "PER"),
