@@ -28,7 +28,7 @@ zalo_entities_full = [
     "cầu thủ ghi bàn", 
     "cầu thủ nhận thẻ",
     "cầu thủ ra sân",
-    "cầu thủ vào sân",
+    "cầu thủ thay thế",
     "thời gian ghi bàn",
     "thời gian nhận thẻ",
     "thời gian vào sân"
@@ -47,9 +47,9 @@ zalo_relations = [
 zalo_relations_full = [
     "đấu với",
     "đạt được",
-    "ghi bàn cho",
-    "ghi bàn tại",
-    "nhân thẻ cho",
+    "lập công cho",
+    "lập công tại",
+    "thuộc",
     "nhận thẻ tại",    
     "thay thế cho",
     "vào sân tại"

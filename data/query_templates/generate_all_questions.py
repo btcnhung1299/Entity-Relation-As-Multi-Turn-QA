@@ -28,7 +28,7 @@ zalo_entity_names = [
     "cầu thủ ghi bàn", 
     "cầu thủ nhận thẻ",
     "cầu thủ ra sân",
-    "cầu thủ vào sân",
+    "cầu thủ thay thế",
     "thời gian ghi bàn",
     "thời gian nhận thẻ",
     "thời gian vào sân"
@@ -48,9 +48,9 @@ zalo_relation_tags = [
 zalo_relations_names = [
     "đấu với",
     "đạt được",
-    "ghi bàn cho",
-    "ghi bàn tại",
-    "nhân thẻ cho",
+    "lập công cho",
+    "lập công tại",
+    "thuộc",
     "nhận thẻ tại",    
     "thay thế cho",
     "vào sân tại"
