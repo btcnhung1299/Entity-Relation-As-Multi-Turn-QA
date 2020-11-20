@@ -131,6 +131,7 @@ def get_block_er(txt, entities, relations, window_size, overlap, tokenizer):
     blocks, block_range = passage_blocks(txt, window_size, overlap)
     ber = [[[], [], []] for i in range(len(block_range))]
     e_dict = {}
+    count = 0
     for i, (s, e) in enumerate(block_range):
         es = []
         for j, (entity_type, start, end, entity_str) in enumerate(entities):
@@ -161,7 +162,10 @@ def get_block_er(txt, entities, relations, window_size, overlap, tokenizer):
                     block_range[i][0], entities[e2i][3]
                 ber[i][2].append((r, (t1, s1, e1, es1), (t2, s2, e2, es2)))
         else:
-            print("The two entities of the relationship are not on the same sentence")
+            count += 1
+            # print("The two entities of the relationship are not on the same sentence")
+    if count > 1:        
+        print("Entites of relations in different sentence:", count)
     return ber
 
 
@@ -299,17 +303,22 @@ def process(data_dir, output_dir, tokenizer, is_test, window_size, overlap, data
     ann_files = []
     txt_files = []
     data = []
+    files = []
     for f in os.listdir(data_dir):
         if f.endswith('.txt'):
             txt_files.append(os.path.join(data_dir, f))
+            files.append(f.split(".")[0])
         elif f.endswith('.ann'):
             ann_files.append(os.path.join(data_dir, f))
     ann_files = sorted(ann_files)
     txt_files = sorted(txt_files)
-    for ann_path, txt_path in tqdm(zip(ann_files, txt_files), total=len(ann_files)):
+    files = sorted(files)
+    
+    for fname, ann_path, txt_path in tqdm(zip(files, ann_files, txt_files), total=len(ann_files)):
         with open(txt_path, encoding='utf-8') as f:
             raw_txt = f.read()
             txt = [t for t in raw_txt.split('\n') if t.strip()]
+        
         # get the title information, the title will be added to all windows of a passage
         title = "" 
         content = txt[0]
@@ -317,12 +326,12 @@ def process(data_dir, output_dir, tokenizer, is_test, window_size, overlap, data
         # offset = raw_txt.index(content)
         ntxt1 = tokenizer.tokenize(content)
         ntxt2 = tokenizer.convert_tokens_to_string(ntxt1)
-        entities, relations = aligment_ann(
-            raw_txt[offset:], ntxt2, ann_path, offset)
+        entities, relations = aligment_ann(raw_txt[offset:], ntxt2, ann_path, offset)
+
         # convert entitiy index from char level to wordpiece level
         entities = char_to_wordpiece(ntxt2, entities, tokenizer)
         if is_test:
-            data.append({"title": title, "passage": ntxt1,
+            data.append({"title": title, "passage": ntxt1, "id": fname,
                          "entities": entities, "relations": relations})
         else:
             block_er = get_block_er(

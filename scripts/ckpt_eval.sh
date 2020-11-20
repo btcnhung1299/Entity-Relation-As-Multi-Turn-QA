@@ -1,11 +1,11 @@
-HOME=/home/wangnan
-REPO=$HOME/ERE-MQA
-
+export CUDA_VISIBLE_DEVICES=3
+HOME=~/joanna
+REPO=$HOME/zalo/Entity-Relation-As-Multi-Turn-QA
 
 python $REPO/ckpt_eval.py \
---window_size 300 \
---overlap 45 \
---checkpoint_path $REPO/checkpoints/ace2004/2020_10_10_00_09_21/checkpoint_0.cpt \
---test_path $REPO/data/cleaned_data/ACE2004/test0.json \
+--window_size 220 \
+--overlap 10 \
+--checkpoint_path $REPO/checkpoints/zalo/2020_11_20_02_16_22/checkpoint_1.ckpt \
+--test_path $REPO/data/cleaned_data/zalo/dev.json \
 --test_batch 20 \
---threshold 3
+--threshold 1
