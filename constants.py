@@ -11,12 +11,49 @@ ace2005_question_templates = json.load(open(question_templates_path + 'ace2005.j
 zalo_question_templates = json.load(open(question_templates_path + "zalo_all.json"))
 
 
-zalo_entities = ["PER", "CLU", "TME", "SCO"]
-zalo_entities_full = ["cầu thủ", "đội bóng", "mốc thời gian", "điểm số"]
+zalo_entities = [
+    "CLU", 
+    "SCO",
+    "PSC",
+    "PCA", 
+    "PSO",
+    "PSI",
+    "TSC",
+    "TCA", 
+    "TSI"
+]
+zalo_entities_full = [
+    "câu lạc bộ",
+    "số bàn thắng",
+    "cầu thủ ghi bàn", 
+    "cầu thủ nhận thẻ",
+    "cầu thủ ra sân",
+    "cầu thủ vào sân",
+    "thời gian ghi bàn",
+    "thời gian nhận thẻ",
+    "thời gian vào sân"
+]
 
-zalo_relations = ["COMP", "SCOC", "SCOP", "SCOT", "CARP", "CART", "SUBP", "SUBT"]
-zalo_relations_full = ["đấu với", "đạt được của", "ghi bàn cho", "là thời điểm ghi bàn của", "nhận thẻ phạt thuộc",
-                        "là thời điểm nhận thẻ phạt của", "thay thế cho", "là thời điểm thay thế của"]
+zalo_relations = [
+    "COMP", # CLU - CLU
+    "SCOC", # CLU - SCO
+    "SCOP", # PSC - CLU 
+    "SCOT", # PSC - TSC
+    "CARP", # PCA - CLU
+    "CART", # PCA - TCA
+    "SUBP", # PSI - PSO
+    "SUBT"  # PSI - TSI
+]
+zalo_relations_full = [
+    "đấu với",
+    "đạt được",
+    "ghi bàn cho",
+    "ghi bàn tại",
+    "nhân thẻ cho",
+    "nhận thẻ tại",    
+    "thay thế cho",
+    "vào sân tại"
+]
 
 
 ace2004_entities = ['FAC', 'GPE', 'LOC', 'ORG', 'PER', 'VEH', 'WEA']
@@ -37,7 +74,18 @@ ace2005_relations_full = ["artifact", "gen affilliation",
 
 
 # index of ace2004 and ace2005 frequency matrix
-zalo_idx1 = {"PER": 0, "CLU": 1, "TME": 2, "SCO": 3}
+zalo_idx1 = {
+    "CLU": 0,
+    "SCO": 1, 
+    "PSC": 2, 
+    "PCA": 3, 
+    "PSO": 4, 
+    "PSI": 5,
+    "TSC": 6,
+    "TCA": 7, 
+    "TSI": 8
+}
+
 ace2004_idx1 = {'FAC': 0, 'GPE': 1, 'LOC': 2,
                 'ORG': 3, 'PER': 4, 'VEH': 5, 'WEA': 6}
 ace2005_idx1 = {'FAC': 0, 'GPE': 1, 'LOC': 2,
@@ -130,12 +178,12 @@ zalo_dist = [[0] * len(zalo_entities) * len(zalo_relations)
 zalo_pairs = [
     ("CLU", "CLU"),
     ("CLU", "SCO"),
-    ("CLU", "PER"),
-    ("PER", "TME"),
-    ("CLU", "PER"),
-    ("PER", "TME"),
-    ("PER", "PER"),
-    ("PER", "TME")
+    ("PSC", "CLU"),
+    ("PSC", "TSC"),
+    ("PCA", "CLU"),
+    ("PCA", "TCA"),
+    ("PSI", "PSO"),
+    ("PSI", "TSI")
 ]
 
 for rel, pair in zip(zalo_relations, zalo_pairs):
