@@ -6,3 +6,5 @@ VnCoreNLP/
 __pycache__/
 predictions.zip
 predictions/
+tmp.py 
+test_result*.jsonl

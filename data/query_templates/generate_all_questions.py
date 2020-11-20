@@ -2,39 +2,58 @@
 import json 
 
 zalo_entity_tags = [
-    "PER",   # player
-    "CLU",   # club
-    "TME",   # time
-    "SCO" # scores
+    "CLU", 
+    "SCO",
+    "PSC",
+    "PCA", 
+    "PSO",
+    "PSI",
+    "TSC",
+    "TCA", 
+    "TSI"
+    # CLU: clb
+    # SCO: số lượng bàn
+    # PSC: cầu thủ ghi bàn
+    # PCA: cầu thủ nhận thẻ
+    # PSO: cầu thủ ra sân
+    # PSI: cầu thủ vào sân
+    # TSC: thời gian ghi bàn
+    # TCA: thời gian nhận thẻ
+    # TSI: thời gian vào sân/ra sân
 ]
 
 zalo_entity_names = [
-    "cầu thủ",
-    "đội bóng",
-    "mốc thời gian", 
-    "điểm số"
+    "câu lạc bộ",
+    "số bàn thắng",
+    "cầu thủ ghi bàn", 
+    "cầu thủ nhận thẻ",
+    "cầu thủ ra sân",
+    "cầu thủ vào sân",
+    "thời gian ghi bàn",
+    "thời gian nhận thẻ",
+    "thời gian vào sân"
 ]
 
 zalo_relation_tags = [
-    "COMP",  # (CLU, CLU) compete with
-    "SCOC",  # (CLU, SCO) have score
-    "SCOP",  # (CLU, PER) score player
-    "SCOT",  # (PER, TME) score time
-    "CARP",  # (CLU, PER) card player,
-    "CART",  # (PER, TIME) card time
-    "SUBP",  # (PER, PER) substitute players,
-    "SUBT",  # (PER, TIME) substitute time
+    "COMP", # CLU - CLU
+    "SCOC", # CLU - SCO
+    "SCOP", # PSC - CLU 
+    "SCOT", # PSC - TSC
+    "CARP", # PCA - CLU
+    "CART", # PCA - TCA
+    "SUBP", # PSI - PSO
+    "SUBT"  # PSI - TSI
 ]
 
 zalo_relations_names = [
     "đấu với",
-    "đạt được của",
+    "đạt được",
     "ghi bàn cho",
-    "là thời điểm ghi bàn của",
-    "nhận thẻ phạt thuộc",
-    "là thời điểm nhận thẻ phạt của",    
+    "ghi bàn tại",
+    "nhân thẻ cho",
+    "nhận thẻ tại",    
     "thay thế cho",
-    "là thời điểm thay thế của"
+    "vào sân tại"
 ]
 
 
@@ -47,7 +66,7 @@ if __name__ == "__main__":
         for relation, relation_name in zip(zalo_relation_tags, zalo_relations_names):
             for tail_entity, tail_entity_name in zip(zalo_entity_tags, zalo_entity_names):
                 templates['qa_turn2'][str((head_entity, relation, tail_entity))] = \
-                    "liệt kê {} {} {} XXX.".format(tail_entity_name, relation_name, head_entity_name)
+                    "{} XXX {} {} nào?".format(head_entity_name, relation_name, tail_entity_name)
                 
     with open("zalo_all.json", "w") as f:
         json.dump(templates, f, ensure_ascii=False)
