@@ -20,18 +20,29 @@ def merge_team_time(player_time, player_team, name_mapping, team_only=False, tim
     """
     pt = defaultdict(list)
     players = set()
+    time_players, team_players = set(), set()
     for time, player in player_time:
         pt[name_mapping[player]].append(time)
         players.add(name_mapping[player])
+        time_players.add(name_mapping[player])
 
     pc = defaultdict(str)
     for player, club in player_team:
         pc[name_mapping[player]] = club 
         players.add(name_mapping[player])
+        team_players.add(name_mapping[player])
 
     # merge information from the above two dictionaries
     result_list = []
-    iterator = players if not team_only else [name_mapping[player] for player, _ in player_team]
+    if team_only and time_only:
+        iterator = time_players.union(team_players)
+    elif team_only:
+        iterator = team_players
+    elif time_only:
+        iterator = time_players
+    else:
+        iterator = players
+
     for player in iterator:
         team = pc[player]
         times = pt[player]
@@ -53,7 +64,7 @@ def merge_team_time(player_time, player_team, name_mapping, team_only=False, tim
 
     return result_list
 
-def postprocess(prediction_dir, output_file='test_result.jsonl', full_name=False):
+def postprocess(prediction_dir, output_file='test_result.jsonl', full_name=False, time_only=False, team_only=False):
     test_result = []
     files = [f for f in listdir(prediction_dir) if isfile(join(prediction_dir, f))]
 
@@ -129,36 +140,38 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', full_name=False
             "score1": str(s1),
             "score2": str(s2) 
         }
+
+        # get a list of all players name
+        players = entities.get('PER', set())
+        for _, player in relations.get('SCOT', []):
+            players.add(player)
+        for _, player in relations.get('CART', []):
+            players.add(player)
+        for player, _ in relations.get('SCOP', []):
+            players.add(player)
+        for player, _ in relations.get('CARP', []):
+            players.add(player)
+        for player_in, player_out in relations.get('SUBP', []):
+            players.add(player_in)
+            players.add(player_out)
+            
+        players = list(players)
         # mapping from name to ful name
         name_mapping = {player: player for player in players}
 
         if full_name:
-            # get a list of all players name
-            players = entities.get('PER', set())
-            for _, player in relations.get('SCOT', []):
-                players.add(player)
-            for _, player in relations.get('CART', []):
-                players.add(player)
-            for player, _ in relations.get('SCOP', []):
-                players.add(player)
-            for player, _ in relations.get('CARP', []):
-                players.add(player)
-            for player_in, player_out in relations.get('SUBP', []):
-                players.add(player_in)
-                players.add(player_out)
-            
-            players = list(players)
-
             for name in players:
                 for reference in players:
                     full_name = mapping(name, reference)
                     if len(full_name) > len(name_mapping[name]):
                         name_mapping[name] = full_name
 
-        score_list = merge_team_time(relations.get('SCOT', []), relations.get('SCOP', []), name_mapping, team_only=True)
+        score_list = merge_team_time(relations.get('SCOT', []), relations.get('SCOP', []), 
+                                name_mapping, time_only=time_only, team_only=team_only)
         match_summary["score_list"] = score_list
 
-        card_list = merge_team_time(relations.get('CART', []), relations.get('CARP', []), name_mapping)
+        card_list = merge_team_time(relations.get('CART', []), relations.get('CARP', []), 
+                                name_mapping, time_only=time_only, team_only=team_only)
         match_summary["card_list"] = card_list
 
         # get substitution list
@@ -166,10 +179,7 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', full_name=False
         sub_time = defaultdict(str)
 
         for time, player_in in relations.get('SUBT', []):
-            try:
-                sub_time[name_mapping[player_in]] = time
-            except:
-                print(time, player_in)
+            sub_time[name_mapping[player_in]] = time
 
         for player_in, player_out in relations.get('SUBP', []):
             sub_info = { 
@@ -191,4 +201,11 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', full_name=False
             f.write('\n')
 
 if __name__ == "__main__":
-    postprocess('predictions', 'test_result_18_2011.jsonl')
+    postprocess('predictions', 'test_result_23_2011_timeonly.jsonl', time_only=True)
+    postprocess('predictions', 'test_result_23_2011_teamonly.jsonl', team_only=True)
+    postprocess('predictions', 'test_result_23_2011_timeteamonly.jsonl', time_only=True, team_only=True)
+    postprocess('predictions', 'test_result_23_2011_all.jsonl')
+    postprocess('predictions', 'test_result_23_2011_timeonly_fullname.jsonl', time_only=True, full_name=True)
+    postprocess('predictions', 'test_result_23_2011_teamonly_fullname.jsonl', team_only=True, full_name=True)
+    postprocess('predictions', 'test_result_23_2011_timeteamonly_fullname.jsonl', time_only=True, team_only=True, full_name=True)
+    postprocess('predictions', 'test_result_23_2011_all_fullname.jsonl', full_name=True)    

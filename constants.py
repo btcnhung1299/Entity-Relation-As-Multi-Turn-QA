@@ -46,13 +46,13 @@ zalo_relations = [
 ]
 zalo_relations_full = [
     "đấu với",
-    "đạt được",
-    "lập công cho",
-    "lập công tại",
-    "thuộc",
-    "nhận thẻ tại",    
-    "thay thế cho",
-    "vào sân tại"
+    "đạt được bởi",
+    "có pha lập công của",
+    "là thời điểm lập công của",
+    "có thẻ phạt từ",
+    "là thời điểm nhận thẻ phạt của",    
+    "bị thế chỗ bởi",
+    "là thời điểm bắt đầu của"
 ]
 
 

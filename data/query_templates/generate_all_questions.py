@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 import json 
 
 zalo_entity_tags = [
@@ -11,15 +11,6 @@ zalo_entity_tags = [
     "TSC",
     "TCA", 
     "TSI"
-    # CLU: clb
-    # SCO: số lượng bàn
-    # PSC: cầu thủ ghi bàn
-    # PCA: cầu thủ nhận thẻ
-    # PSO: cầu thủ ra sân
-    # PSI: cầu thủ vào sân
-    # TSC: thời gian ghi bàn
-    # TCA: thời gian nhận thẻ
-    # TSI: thời gian vào sân/ra sân
 ]
 
 zalo_entity_names = [
@@ -47,13 +38,13 @@ zalo_relation_tags = [
 
 zalo_relations_names = [
     "đấu với",
-    "đạt được",
-    "lập công cho",
-    "lập công tại",
-    "thuộc",
-    "nhận thẻ tại",    
-    "thay thế cho",
-    "vào sân tại"
+    "đạt được bởi",
+    "có pha lập công của",
+    "là thời điểm lập công của",
+    "có thẻ phạt từ",
+    "là thời điểm nhận thẻ phạt của",    
+    "bị thế chỗ bởi",
+    "là thời điểm bắt đầu của"
 ]
 
 
@@ -66,7 +57,7 @@ if __name__ == "__main__":
         for relation, relation_name in zip(zalo_relation_tags, zalo_relations_names):
             for tail_entity, tail_entity_name in zip(zalo_entity_tags, zalo_entity_names):
                 templates['qa_turn2'][str((head_entity, relation, tail_entity))] = \
-                    "{} XXX {} {} nào?".format(head_entity_name, relation_name, tail_entity_name)
+                    "{} nào {} {} XXX.".format(tail_entity_name, relation_name, head_entity_name)
                 
     with open("zalo_all.json", "w") as f:
         json.dump(templates, f, ensure_ascii=False)
