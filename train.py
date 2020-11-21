@@ -32,7 +32,7 @@ def args_parser():
     parser.add_argument("--train_batch", type=int, default=10)
     parser.add_argument("--test_path")
     parser.add_argument("--test_batch", type=int, default=10)
-    parser.add_argument("--max_len", default=512, type=int,
+    parser.add_argument("--max_len", default=256, type=int,
                         help="maximum length of input")
     parser.add_argument("--pretrained_model_path")
     parser.add_argument("--max_epochs", default=10, type=int)

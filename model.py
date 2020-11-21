@@ -11,7 +11,8 @@ class MyModel(nn.Module):
         self.tag_linear = nn.Linear(self.bert.config.hidden_size, 5)
         self.dropout = nn.Dropout(config.dropout_prob)
         self.loss_func = nn.CrossEntropyLoss()
-        self.theta = config.theta
+        # self.theta = config.theta
+        self.theta = 0.7
 
     def forward(self, input, attention_mask, token_type_ids, context_mask=None, turn_mask=None, target_tags=None):
         """
@@ -45,10 +46,9 @@ class MyModel(nn.Module):
                 target_tags_t1) != 0 else torch.tensor(0).type_as(input)
             loss_t2 = self.loss_func(tag_logits_t2, target_tags_t2) if len(
                 target_tags_t2) != 0 else torch.tensor(0).type_as(input)
-            loss = self.theta*loss_t1+(1-self.theta)*loss_t2
+            loss = self.theta * loss_t1 + (1-self.theta) * loss_t2 + 5
             return loss, (loss_t1.item(), loss_t2.item())
         else:
             # for prediction
-            tag_idxs = torch.argmax(
-                tag_logits, dim=-1).squeeze(-1)  # (batch,seq_len)
+            tag_idxs = torch.argmax(tag_logits, dim=-1).squeeze(-1)  # (batch,seq_len)
             return tag_idxs
