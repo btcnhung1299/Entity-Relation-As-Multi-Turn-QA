@@ -79,7 +79,6 @@ def eval_t1(predict, gold, ids, query_offset, window_offset_base):
                             end - query_offset[i] + window_offset
             new = (passage_id, (entity_type, start1, end1))
             predict1.append(new)
-    print("predicted 1", predict1)
     return get_score(set(gold), set(predict1))
 
 

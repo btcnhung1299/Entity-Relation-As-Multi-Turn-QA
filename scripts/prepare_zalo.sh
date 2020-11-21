@@ -1,6 +1,6 @@
 HOME=~/joanna
 REPO=$HOME/zalo/Entity-Relation-As-Multi-Turn-QA
-PRETRAINED_MODEL_PATH=vinai/phobert-large
+PRETRAINED_MODEL_PATH=vinai/phobert-base
 
 python3 $REPO/preprocess_zalo.py \
 --data_dir $REPO/data/raw_data/zalo/train \

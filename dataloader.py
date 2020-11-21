@@ -50,12 +50,9 @@ def collate_fn1(batch):
     txt_ids = nbatch['txt_ids']
     context_mask = nbatch['context_mask']
     token_type_ids = nbatch['token_type_ids']
-    ntxt_ids = pad_sequence(txt_ids, batch_first=True,
-                            padding_value=0)
-    ncontext_mask = pad_sequence(
-        context_mask, batch_first=True, padding_value=0)
-    ntoken_type_ids = pad_sequence(
-        token_type_ids, batch_first=True, padding_value=1)
+    ntxt_ids = pad_sequence(txt_ids, batch_first=True, padding_value=0)
+    ncontext_mask = pad_sequence(context_mask, batch_first=True, padding_value=0)
+    ntoken_type_ids = pad_sequence(token_type_ids, batch_first=True, padding_value=1)
     attention_mask = torch.zeros(ntxt_ids.shape)
     for i in range(len(ntxt_ids)):
         txt_len = len(txt_ids[i])
@@ -95,10 +92,9 @@ def get_inputs(context, q, tokenizer, title="", max_len=200, ans=[], head_entity
                     len(query) - 3] if not title else tags[:max_len-len(query)-len(title)-4]
 
     if title:
-        txt = ['[CLS]'] + query + ['[SEP]'] + \
-            title + ['[SEP]'] + context + ['[SEP]']
+        txt = ['<s>'] + query + ['</s>'] + title + ['</s>'] + context + ['</s>']
     else:
-        txt = ['[CLS]'] + query + ['[SEP]'] + context + ['[SEP]']
+        txt = ['<s>'] + query + ['</s>'] + context + ['</s>']
     txt_ids = tokenizer.convert_tokens_to_ids(txt)
     # [CLS] is used to judge whether there is an answer
     if not title:
@@ -130,7 +126,7 @@ def query2relation(question, question_templates):
 
 
 class MyDataset:
-    def __init__(self, dataset_tag, path, tokenizer, max_len=512, threshold=5):
+    def __init__(self, dataset_tag, path, tokenizer, max_len=256, threshold=5):
         """
         Args:
             dataset_tag: type of dataset
@@ -214,7 +210,7 @@ class MyDataset:
 
 
 class T1Dataset:
-    def __init__(self, dataset_tag, test_path, tokenizer, window_size, overlap, max_len=512):
+    def __init__(self, dataset_tag, test_path, tokenizer, window_size, overlap, max_len=256):
         """
         Args:
             dataset_tag: type of dataset
@@ -248,6 +244,7 @@ class T1Dataset:
         self.t1_querys = []
         self.t1_ids = []
         self.t1_gold = []
+        self.ids = []
         self.tokenizer = tokenizer
         self.max_len = max_len
         # passage_windows[i][j] represents the j-th window of the i-th passage
@@ -264,6 +261,7 @@ class T1Dataset:
             entities = d['entities']
             relations = d['relations']
             title = d['title']
+            self.ids.append(d["id"])
             self.passages.append(passage)
             self.entities.append(entities)
             self.relations.append(relations)
@@ -409,7 +407,7 @@ def reload_data(old_dataloader, batch_size, max_len, threshold, local_rank, shuf
     return dataloader
 
 
-def load_t1_data(dataset_tag, test_path, pretrained_model_path, window_size, overlap, batch_size=10, max_len=512):
+def load_t1_data(dataset_tag, test_path, pretrained_model_path, window_size, overlap, batch_size=10, max_len=256):
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_path)
     t1_dataset = T1Dataset(dataset_tag, test_path, tokenizer, window_size, overlap, max_len)
     dataloader = DataLoader(t1_dataset, batch_size, collate_fn=collate_fn1, drop_last=True)
