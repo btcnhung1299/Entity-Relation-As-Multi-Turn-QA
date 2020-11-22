@@ -109,6 +109,9 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', time_only=False
             if not club1.isdigit() and not club2.isdigit():
                 team1, team2 = club1, club2
 
+
+        # CHECK THEM STRIP MAY CAY U20 (U\DIGIT) RUI COMPARE 
+        # DO CO U20 Argentina vs Argentina ne ==> dung ra la Viet_Nam
         # 2. check SCOP relation
         for _, club in relations.get('SCOP', []):
             if not club.isdigit():
@@ -271,5 +274,5 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', time_only=False
             f.write('\n')
 
 if __name__ == "__main__":
-    postprocess('predictions', time_only=True)
+    postprocess('predictions', time_only=False)
 
