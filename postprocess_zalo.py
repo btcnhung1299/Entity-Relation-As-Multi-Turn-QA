@@ -28,6 +28,7 @@ def lcs(X, Y):
     return L[m][n] 
 # end of function lcs 
 
+
 def merge_team_time(player_time, player_team, team_only=False, time_only=False):
     """
     team_only: only keep information in which team is available
@@ -61,7 +62,7 @@ def merge_team_time(player_time, player_team, team_only=False, time_only=False):
     for player in iterator:
         team = pc[player]
         times = pt[player]
-
+        
         if not times:
             # if time info is not available
             result_list.append({
@@ -78,6 +79,7 @@ def merge_team_time(player_time, player_team, team_only=False, time_only=False):
                 })
 
     return result_list
+
 
 def postprocess(prediction_dir, output_file='test_result.jsonl', time_only=False, team_only=False):
     test_result = []
@@ -104,24 +106,53 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', time_only=False
 
         team1, team2 = "", "" 
 
-        # 1.check / prioritize COMP relation
-        for club1, club2 in relations.get('COMP', []):
-            if not club1.isdigit() and not club2.isdigit():
-                team1, team2 = club1, club2
 
-
-        # CHECK THEM STRIP MAY CAY U20 (U\DIGIT) RUI COMPARE 
-        # DO CO U20 Argentina vs Argentina ne ==> dung ra la Viet_Nam
-        # 2. check SCOP relation
+        # 1. check SCOP relation => prioritize SCOP
         for _, club in relations.get('SCOP', []):
             if not club.isdigit():
+
                 if lcs(team1, club) == len(team1):
                     team1 = club
 
                 elif lcs(team2, club) == len(team2):
                     team2 = club
-  
-        # print(f"{test_id} - team1: {team1} - team2: {team2}")
+
+            # Ensure team1 <> team2
+            if team1 != '' and lcs(team1, team2) == len(team1):
+                team1 = ''
+
+            elif team2 != '' and lcs(team1, team2) == len(team2):
+                team2 = ''
+
+
+        #     print(f"{test_id} - team1: {team1} - team2: {team2}")
+
+        # 2.check COMP relation
+        for club1, club2 in relations.get('COMP', []):
+            if not club1.isdigit() and not club2.isdigit():
+                
+                # 3 cases:
+                # - 2 teams are empty => unpack normally
+                # - team 1 is empty => team2 is also empty => 1st case
+                # - team 1 is not empty 
+
+                if team1 != '':
+                    if lcs(team1, club1) == len(club1):
+                        team2 = club2
+                    else: # team1 = club2 => team2 = club1 | team1 <> club1 & team1 <> club2 => team2 = club1
+                        team2 = club1
+
+                else:   
+                    team1, team2 = club1, club2
+            
+            # Ensure team1 <> team2
+            if team1 != '' and lcs(team1, team2) == len(team1):
+                team1 = ''
+
+            elif team2 != '' and lcs(team1, team2) == len(team2):
+                team2 = ''
+
+        #     print(f"{test_id} - team1: {team1} - team2: {team2}")
 
         # 3.check SCOC relation
         for club, _ in relations.get('SCOC', []):
@@ -131,6 +162,13 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', time_only=False
 
                 elif lcs(team2, club) == len(team2):
                     team2 = club
+
+            # Ensure team1 <> team2
+            if team1 != '' and lcs(team1, team2) == len(team1):
+                team1 = ''
+
+            elif team2 != '' and lcs(team1, team2) == len(team2):
+                team2 = ''
   
         # print(f"{test_id} - team1: {team1} - team2: {team2}")
 
@@ -138,27 +176,43 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', time_only=False
         # 4. check CARP relation
         for _, club in relations.get('CARP', []):
             if not club.isdigit():
+    
                 if lcs(team1, club) == len(team1):
                     team1 = club
 
                 elif lcs(team2, club) == len(team2):
                     team2 = club
-            
-        # print(f"{test_id} - team1: {team1} - team2: {team2} ")
 
+            # Ensure team1 <> team2
+            if team1 != '' and lcs(team1, team2) == len(team1):
+                team1 = ''
+
+            elif team2 != '' and lcs(team1, team2) == len(team2):
+                team2 = ''
+        
+        #     print(f"{test_id} - team1: {team1.replace('_', ' ')} - team2: {team2.replace('_', ' ')}")
+        # print(f"{test_id} - team1: {team1} - team2: {team2} ")
 
         # 5.check CLU entity
 
         for club in set(entities['CLU']):  
             if not club.isdigit():
+
                 if lcs(team1, club) == len(team1):
                     team1 = club
                 
                 elif lcs(team2, club) == len(team2):
                     team2 = club
 
-              
-        # print(f"{test_id} - team1: {team1.replace('_', ' ')} - team2: {team2.replace('_', ' ')}")
+            # Ensure team1 <> team2
+            if team1 != '' and lcs(team1, team2) == len(team1):
+                team1 = ''
+
+            elif team2 != '' and lcs(team1, team2) == len(team2):
+                team2 = ''
+
+
+        #     print(f"{test_id} - team1: {team1.replace('_', ' ')} - team2: {team2.replace('_', ' ')}")
 
     
         match_summary["players"] = {
@@ -168,9 +222,10 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', time_only=False
 
 
         # Get a list of all players name
+
         players = entities.get('PSC', set())
         
-        for player in entities.get('PSA', set()):
+        for player in entities.get('PCA', set()):
             players.add(player)
 
         for player in entities.get('PSO', set()):
@@ -203,11 +258,25 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', time_only=False
         # 1. SCOP relation
         # group player by team => num of players = team score
         for player, team in relations.get('SCOP', []):
+
+            # FUNC: to handle cases where CLU in SCOP is short ver of team name
+            if lcs(team, team1) == len(team): # if team1 contains team
+                team = team1
+            elif lcs(team, team2) == len(team):
+                team = team2
+
             if team_score_mapping.get(team) is not None:
                 team_score_mapping[team] += 1
 
         # 2. SCOC relation
         for team, score in relations.get('SCOC', []):
+
+            # FUNC: to handle cases where CLU in SCOC is short ver of team name
+            if lcs(team, team1) == len(team): # if team1 contains team
+                team = team1
+            elif lcs(team, team2) == len(team):
+                team = team2
+
             if team_score_mapping.get(team) == 0 and score.isdigit():
                 team_score_mapping[team] = score
 
@@ -218,6 +287,11 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', time_only=False
             if len(scores) == 1 and (team_score_mapping.get(team1) != 0 and team_score_mapping.get(team2) != 0): # the two teams draw
                 team_score_mapping[team1] += 1
                 team_score_mapping[team2] += 1
+
+            elif len(scores) == 2 and (team_score_mapping.get(team1) == 0 and team_score_mapping.get(team2) == 0): 
+                # handle (0, 0) scoreboard. If there're only 2 scores, assign randomly
+                team_score_mapping[team1] = scores.pop()
+                team_score_mapping[team2] = scores.pop()
         except:
             pass
             
@@ -227,19 +301,20 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', time_only=False
             "score2": str(team_score_mapping[team2]) 
         }
 
-        # print(f"{test_id} - score: {team_score_mapping}")
+        #     print(f"{test_id} - score: {team_score_mapping}")
 
-        # WILL POSTPROCESS AGAIN TOMORROW
         # Get score list
-        score_list = merge_team_time(relations.get('SCOT', []), relations.get('SCOP', []), 
+
+        score_list = merge_team_time(relations.get('SCOT', []), relations.get('SCOP', []),
                             time_only=time_only, team_only=team_only)
         match_summary["score_list"] = score_list
         
         # print(f"{test_id} - score: {score_list}")
 
-        card_list = merge_team_time(relations.get('CART', []), relations.get('CARP', []), 
+        card_list = merge_team_time(relations.get('CART', []), relations.get('CARP', []),
                                 time_only=time_only, team_only=team_only)
         match_summary["card_list"] = card_list
+
 
         
         # print(f"{test_id} - score: {card_list}")
@@ -272,6 +347,7 @@ def postprocess(prediction_dir, output_file='test_result.jsonl', time_only=False
         for article in test_result:
             json.dump(article, f, ensure_ascii=False)
             f.write('\n')
+           
 
 if __name__ == "__main__":
     postprocess('predictions', time_only=False)
