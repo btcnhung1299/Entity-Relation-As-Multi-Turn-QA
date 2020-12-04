@@ -80,10 +80,11 @@ The extracted entities will then be used as the head entities in the question te
 
 To reflect the jointly extraction method, the loss function took into account loss of both entites and relation extraction phase:
 
-$$ L = (1-\lambda)L(\text{head-entity}) + \lambda L(\text{tail-entity}, \text{relation})$$ 
-where $\lambda$ is the parameter that controls the trade-off between extracting the right head entities and accurately extracting the tail entities in their corresponding relations. Please refer to the [paper](https://arxiv.org/abs/1905.05529) for more details.
+<a href="https://www.codecogs.com/eqnedit.php?latex=\dpi{120}&space;L&space;=&space;(1-\lambda)L(\text{head-entity})&space;&plus;&space;\lambda&space;L(\text{tail-entity},&space;\text{relation})" target="_blank"><img src="https://latex.codecogs.com/svg.latex?\dpi{120}&space;L&space;=&space;(1-\lambda)L(\text{head-entity})&space;&plus;&space;\lambda&space;L(\text{tail-entity},&space;\text{relation})" title="L = (1-\lambda)L(\text{head-entity}) + \lambda L(\text{tail-entity}, \text{relation})" /></a>
 
-The code for the original model is available at [the official repository](https://github.com/ShannonAI/Entity-Relation-As-Multi-Turn-QA) of the paper. The modified version for the challenge can be found at [our forked repository](https://github.com/btcnhung1299/Entity-Relation-As-Multi-Turn-QA).
+where <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\dpi{120}&space;\lambda" target="_blank"><img src="https://latex.codecogs.com/svg.latex?\inline&space;\dpi{120}&space;\lambda" title="\lambda" /></a> is the parameter that controls the trade-off between extracting the right head entities and accurately extracting the tail entities in their corresponding relations. Please refer to the [paper](https://arxiv.org/abs/1905.05529) for more details.
+
+The code for the original model is available at [the official repository](https://github.com/ShannonAI/Entity-Relation-As-Multi-Turn-QA) of the paper.
 
 ## Post-processing
 The output of the model for each football article is written in a text file where each line contains an entity or a relation prediction. For example:
@@ -118,7 +119,7 @@ The card list is constructed from the information in the `CART` and `CARP` relat
 To create the substitution list, we iterate through all the `SUBP(PSI, PSO)` in the output file to get `player_in` and `player_out` information, and use the `SUBT` relation to pull out the corresponding `time` for the substitution (set `time` to an empty string if this information is not available). We then append the list with all the `in_player` that have not been included with the substitution `time` from the `SUBT`. We again do not consider using the standalone entities `PSI`, `PSO` and `TSI` when constructing the list.
 
 # Code usage
-Firstly, clone our [repository](https://github.com/btcnhung1299/Entity-Relation-As-Multi-Turn-QA)
+Firstly, clone our this repository
 ## Install Requirements
 `pip install -r requirements.txt`
 
