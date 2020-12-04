@@ -120,23 +120,25 @@ To create the substitution list, we iterate through all the `SUBP(PSI, PSO)` in 
 
 # Code usage
 Firstly, clone our this repository
+
 ## Install Requirements
+
 `pip install -r requirements.txt`
 
 ## Preprocessing
-Put train data into ./data/raw
-Go to scripts folder `cd scripts`
-Run command `sh prepare_zalo.sh`
+- Put train data into ./data/raw
+- Go to scripts folder `cd scripts`
+- Run command `sh prepare_zalo.sh`
 
 ## Training
-Go to scripts folder `cd scripts`
-Run command `sh train_zalo.sh`
-After run, model is saved in ./checkpoint 
+- Go to scripts folder `cd scripts`
+- Run command `sh train_zalo.sh`
+- After run, model is saved in ./checkpoint 
 
 ## Inference
-If you want to only predict, please download my [docker](https://drive.google.com/file/d/14TUipw86ZQEyATvqNa6Ew9SCH1Ru79Xl/view?usp=sharing)
-Load image `docker load < nkt_image.tar.gz`
-Run command `docker run –v [path to test data]:/data –v [path to result folder]:/result nkt_image:final /bin/bash
+- If you want to only predict, please download my [docker](https://drive.google.com/file/d/14TUipw86ZQEyATvqNa6Ew9SCH1Ru79Xl/view?usp=sharing)
+- Load image `docker load < nkt_image.tar.gz`
+- Run command `docker run –v [path to test data]:/data –v [path to result folder]:/result nkt_image:final /bin/bash
 /model/predict.sh`
 
 
